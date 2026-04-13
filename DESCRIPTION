@@ -1,0 +1,23 @@
+Package: autocodebook
+Title: Automatic Codebook and Tracking for Spark/dplyr Pipelines
+Version: 0.1.0
+Authors@R: 
+    person("EMERGE", "Team", email = "emerge@example.com", role = c("aut", "cre"))
+Description: Wraps dplyr verbs (mutate, summarise, filter) to automatically 
+    capture variable metadata — type, source columns, categories, and source 
+    code — producing a codebook and eligibility tracking table with zero 
+    manual documentation. Works with both sparklyr (tbl_spark) and local 
+    data frames.
+License: MIT + file LICENSE
+Encoding: UTF-8
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.3.2
+Imports:
+    dplyr (>= 1.1.0),
+    rlang (>= 1.0.0),
+    tibble,
+    gt,
+    dbplyr
+Suggests:
+    sparklyr,
+    testthat (>= 3.0.0)
