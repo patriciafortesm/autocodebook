@@ -1,14 +1,21 @@
 Package: autocodebook
-Title: Automatic Codebook and Tracking for Spark/dplyr Pipelines
-Version: 0.1.0
+Title: Automatic Codebook and Tracking for 'Spark' and 'dplyr' Pipelines
+Version: 0.3.12
 Authors@R: 
-    person("EMERGE", "Team", email = "emerge@example.com", role = c("aut", "cre"))
-Description: Wraps dplyr verbs (mutate, summarise, filter) to automatically 
-    capture variable metadata — type, source columns, categories, and source 
-    code — producing a codebook and eligibility tracking table with zero 
-    manual documentation. Works with both sparklyr (tbl_spark) and local 
-    data frames.
+    person("Patricia Fortes C. de", "Macedo",
+           email = "REPLACE_WITH_REAL_EMAIL@example.org",
+           role = c("aut", "cre"))
+Description: Wraps 'dplyr' verbs (mutate, summarise, filter) to automatically
+    capture variable metadata (type, source columns, categories, and source
+    code), producing a codebook and eligibility tracking table with zero
+    manual documentation. Works with both 'sparklyr' (tbl_spark) and local
+    data frames. Adds big-data optimizations (caching, assume-unique
+    counting, checkpointing) and a standardized report module with an
+    eligibility flowchart, editable codebook export (HTML, DOCX, XLSX), and
+    cross-sectional or longitudinal variable inspection.
 License: MIT + file LICENSE
+URL: https://github.com/REPLACE/autocodebook
+BugReports: https://github.com/REPLACE/autocodebook/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.3.2
@@ -17,7 +24,18 @@ Imports:
     rlang (>= 1.0.0),
     tibble,
     gt,
-    dbplyr
+    stats,
+    utils
 Suggests:
     sparklyr,
-    testthat (>= 3.0.0)
+    dbplyr,
+    testthat (>= 3.0.0),
+    tidyplots,
+    ggplot2,
+    patchwork,
+    rmarkdown,
+    knitr,
+    officer,
+    flextable,
+    openxlsx,
+    scales

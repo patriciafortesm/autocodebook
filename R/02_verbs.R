@@ -1,13 +1,12 @@
 # =============================================================================
 # autocodebook — Wrappers de verbos dplyr/sparklyr
 # =============================================================================
-# auto_mutate()    → mutate + registro automático no codebook
-# auto_summarise() → summarise + registro automático
-# auto_filter()    → filter + registro automático no tracking
+# auto_mutate()    -> mutate + registro automatico no codebook
+# auto_summarise() -> summarise + registro automatico
+# auto_filter()    -> filter + registro automatico no tracking
 # =============================================================================
 
-#' @import rlang
-#' @importFrom dplyr mutate summarise filter select distinct
+# =============================================================================
 
 # =============================================================================
 # auto_mutate()
@@ -17,7 +16,7 @@
 #'
 #' Works exactly like [dplyr::mutate()], but also captures each expression
 #' and registers the resulting variable in the codebook. Type, source columns,
-#' categories, and source code are inferred automatically — you only need to
+#' categories, and source code are inferred automatically - you only need to
 #' provide human-readable labels.
 #'
 #' @param .data A Spark DataFrame (tbl_spark) or local data frame.
@@ -31,36 +30,24 @@
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' cb_init(id_col = "id")
+#' df <- tibble::tibble(id = 1:3, cod_sexo = c(1L, 2L, 1L))
 #' df <- auto_mutate(df,
-#'   labels = list(sex = "Sex", age_cat = "Age category"),
+#'   labels = list(sex = "Sex (M/F)"),
 #'   block  = "Demographics",
-#'   sex = case_when(
-#'     cod_sexo == 1L ~ "Male",
-#'     cod_sexo == 2L ~ "Female",
-#'     TRUE           ~ NA_character_
-#'   ),
-#'   age_cat = case_when(
-#'     age < 18  ~ "Child",
-#'     age < 65  ~ "Adult",
-#'     TRUE      ~ "Elderly"
-#'   )
-#' )
-#' }
+#'   sex = dplyr::if_else(cod_sexo == 1L, "M", "F"))
+#' cb_get()
 auto_mutate <- function(.data, labels = list(), block = "", ...) {
   dots <- rlang::enquos(...)
 
-  # Colunas existentes ANTES do mutate
   existing_cols <- if (inherits(.data, "tbl_spark")) {
     colnames(.data)
   } else {
     names(.data)
   }
 
-  # Executa o mutate normalmente
   result <- mutate(.data, !!!dots)
 
-  # Registra cada variável no codebook
   for (var_name in names(dots)) {
     code_text <- rlang::quo_text(dots[[var_name]])
     code_text_clean <- gsub("\\s+", " ", code_text)
@@ -99,17 +86,12 @@ auto_mutate <- function(.data, labels = list(), block = "", ...) {
 #' @export
 #'
 #' @examples
-#' \dontrun{
-#' summary <- df %>%
-#'   group_by(id) %>%
-#'   auto_summarise(
-#'     labels = list(total = "Total count", first_date = "First observed date"),
-#'     block  = "Migration summary",
-#'     total      = n(),
-#'     first_date = min(date, na.rm = TRUE),
-#'     .groups = "drop"
-#'   )
-#' }
+#' cb_init(id_col = "id")
+#' df <- tibble::tibble(id = 1:6, grp = c(1, 1, 2, 2, 3, 3), val = 1:6)
+#' auto_summarise(df,
+#'   labels = list(mean_val = "Mean value per group"),
+#'   block  = "Summaries",
+#'   mean_val = mean(val))
 auto_summarise <- function(.data, labels = list(), block = "", ...,
                            .groups = "drop") {
   dots <- rlang::enquos(...)
@@ -153,24 +135,42 @@ auto_summarise <- function(.data, labels = list(), block = "", ...,
 #' Works exactly like [dplyr::filter()], but also logs a tracking step
 #' recording how many unique IDs remain after the filter.
 #'
+#' The signature mirrors v0.1.0 for full backward compatibility: `step`
+#' and `description` come first (so existing positional calls keep working),
+#' then `...` for the filter conditions, and finally the new big-data
+#' options (`cache`, `assume_unique`) which **must be passed by name**.
+#'
 #' @param .data A Spark DataFrame or local data frame.
 #' @param step Character label for this filtering step.
 #' @param description Character description of the filter.
 #' @param ... Filter conditions, same syntax as `dplyr::filter()`.
+#' @param cache Logical or NULL (named-only). If TRUE, materializes the
+#'   result with `cb_checkpoint()` after filtering - useful in long Spark
+#'   pipelines. If NULL, falls back to the session default (set via
+#'   `cb_init()` or `cb_set_default_cache()`). Default: NULL.
+#' @param assume_unique Logical (named-only). Passed to `track_step()`.
+#'   Set TRUE only when you are certain the ID column has no duplicates
+#'   at this stage. Default: FALSE.
 #'
 #' @return The filtered data frame.
 #' @export
 #'
 #' @examples
-#' \dontrun{
+#' cb_init(id_col = "id")
+#' df <- tibble::tibble(id = 1:100, age = sample(0:90, 100, replace = TRUE))
 #' df <- auto_filter(df,
-#'   step = "3. Remove missing dates",
-#'   description = "Exclui registros sem data de referência",
-#'   !is.na(dt_reference)
-#' )
-#' }
-auto_filter <- function(.data, step = "", description = "", ...) {
-  result <- filter(.data, ...)
-  track_step(result, step, description)
+#'   step = "Adults", description = "age >= 18",
+#'   age >= 18)
+#' track_get()
+auto_filter <- function(.data, step = "", description = "", ...,
+                        cache = NULL, assume_unique = FALSE) {
+  result <- dplyr::filter(.data, ...)
+
+  use_cache <- if (is.null(cache)) isTRUE(.cb_env$default_cache) else isTRUE(cache)
+  if (use_cache && inherits(result, "tbl_spark")) {
+    result <- cb_checkpoint(result, mode = "memory")
+  }
+
+  track_step(result, step, description, assume_unique = assume_unique)
   result
 }

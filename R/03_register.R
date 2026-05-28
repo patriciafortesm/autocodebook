@@ -8,7 +8,7 @@
 
 #' Manually register a variable in the codebook
 #'
-#' Use when auto_mutate/auto_summarise doesn't apply — e.g. variables
+#' Use when auto_mutate/auto_summarise doesn't apply - e.g. variables
 #' created via window_order + row_number in a separate pipeline step.
 #'
 #' @param var Variable name (character).
@@ -21,6 +21,14 @@
 #'
 #' @return Invisible NULL.
 #' @export
+#'
+#' @examples
+#' cb_init(id_col = "id")
+#' cb_register("follow_up_days",
+#'   label = "Follow-up time in days",
+#'   type = "integer", block = "Time",
+#'   categories = "Continuous >= 0")
+#' cb_get()
 cb_register <- function(var, label, type = NULL, source = "",
                         categories = "", code = "", block = "") {
   if (is.null(type)) type <- "character"
@@ -49,6 +57,11 @@ cb_register <- function(var, label, type = NULL, source = "",
 #' Get the current codebook as a tibble
 #' @return A tibble with all registered variables.
 #' @export
+#'
+#' @examples
+#' cb_init(id_col = "id")
+#' cb_register("x", label = "A variable", type = "numeric")
+#' cb_get()
 cb_get <- function() {
   .cb_env$codebook
 }
@@ -56,6 +69,12 @@ cb_get <- function() {
 #' Reset the codebook (clear all entries)
 #' @return Invisible NULL.
 #' @export
+#'
+#' @examples
+#' cb_init(id_col = "id")
+#' cb_register("x", label = "A variable", type = "numeric")
+#' cb_reset()
+#' cb_get()
 cb_reset <- function() {
   .cb_env$codebook <- tibble(
     variable = character(), type = character(), source = character(),
