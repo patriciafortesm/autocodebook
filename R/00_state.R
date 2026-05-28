@@ -6,6 +6,7 @@
 # independentes via cb_init().
 # =============================================================================
 
+
 # Environment interno — armazena os logs
 .cb_env <- new.env(parent = emptyenv())
 
@@ -97,11 +98,6 @@ cb_init <- function(id_col = "id", verbose = FALSE, default_cache = FALSE) {
 #' @param verbose Logical.
 #' @return Invisible previous value.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' old <- cb_set_verbose(TRUE)
-#' cb_set_verbose(FALSE)
 cb_set_verbose <- function(verbose = TRUE) {
   old <- .cb_env$verbose
   .cb_env$verbose <- isTRUE(verbose)
@@ -113,11 +109,6 @@ cb_set_verbose <- function(verbose = TRUE) {
 #' @param default_cache Logical.
 #' @return Invisible previous value.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' cb_set_default_cache(TRUE)
-#' cb_set_default_cache(FALSE)
 cb_set_default_cache <- function(default_cache = TRUE) {
   old <- .cb_env$default_cache
   .cb_env$default_cache <- isTRUE(default_cache)

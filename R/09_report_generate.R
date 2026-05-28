@@ -40,10 +40,9 @@
 #'   codebook.docx, etc.). If NULL, derived from output_html.
 #' @param export_codebook_editable Logical. Also export codebook as
 #'   .docx and .xlsx in `output_dir`. Default: TRUE.
-#' @param cache_data Logical. If TRUE and `data` is a tbl_spark, persists the
-#'   dataset once (sdf_persist) before the report aggregations, then releases
-#'   it on exit. Avoids re-running a lazy pipeline for every aggregation.
-#'   No-op for local data frames. Default: TRUE.
+#' @param cache_data Logical. If TRUE and `data` is a tbl_spark, persists
+#'   the dataset once before the report aggregations, then releases it on
+#'   exit. No-op for local data frames. Default: TRUE.
 #' @param title Optional title for the report.
 #' @param n_bins Number of bins for numeric histograms. Default: 30.
 #' @param top_n_cat Max categories shown in categorical plots. Default: 20.
@@ -52,19 +51,19 @@
 #' @export
 #'
 #' @examples
-#' \donttest{
-#' # Requires Suggests: rmarkdown, knitr, ggplot2, patchwork, scales.
-#' df <- tibble::tibble(
-#'   id_indiv = 1:200,
-#'   cod_sexo = sample(c(1L, 2L), 200, replace = TRUE),
-#'   age      = sample(0:90, 200, replace = TRUE)
-#' )
-#' cb_init(id_col = "id_indiv")
-#' out <- file.path(tempdir(), "report_baseline.html")
-#' generate_report(df, type = "cross_sectional",
+#' \dontrun{
+#' # Transversal
+#' generate_report(df_baseline, type = "cross_sectional",
 #'                 id_var = "id_indiv",
+#'                 treat_as_categorical = c("cod_sexo", "cod_raca"),
+#'                 output_html = "report_baseline.html")
+#'
+#' # Longitudinal
+#' generate_report(df_long, type = "longitudinal",
+#'                 id_var   = "id_indiv",
+#'                 time_var = "ano_referencia",
 #'                 treat_as_categorical = c("cod_sexo"),
-#'                 output_html = out)
+#'                 output_html = "report_longitudinal.html")
 #' }
 generate_report <- function(data,
                             type = c("cross_sectional", "longitudinal"),
@@ -342,9 +341,6 @@ generate_report <- function(data,
 }
 
 
-# Fallback template (basico). So usado se o template estilizado de
-# inst/rmarkdown/ nao for encontrado (instalacao incompleta). Gera um
-# relatorio funcional, sem o visual dashboard completo.
 #' @keywords internal
 #' @noRd
 .write_default_template <- function(path) {

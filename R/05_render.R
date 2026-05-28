@@ -2,7 +2,6 @@
 # autocodebook — Renderização e exportação
 # =============================================================================
 
-# =============================================================================
 
 # =============================================================================
 # cb_render() — Renderiza codebook como gt table
@@ -16,11 +15,6 @@
 #'
 #' @return A gt object.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' cb_register("age", label = "Age in years", type = "integer")
-#' cb_render()
 cb_render <- function(group_by_block = TRUE, show_code = TRUE) {
   cb <- .cb_env$codebook
 
@@ -154,12 +148,6 @@ cb_render <- function(group_by_block = TRUE, show_code = TRUE) {
 #'
 #' @return A gt object.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:50)
-#' track_step(df, "Initial cohort")
-#' track_render()
 track_render <- function(show_elapsed = FALSE) {
   tr <- .cb_env$tracking
 
@@ -240,12 +228,6 @@ track_render <- function(show_elapsed = FALSE) {
 #'
 #' @return Invisible path.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' cb_register("age", label = "Age in years", type = "integer")
-#' out <- file.path(tempdir(), "codebook.csv")
-#' cb_export(out)
 cb_export <- function(path = "codebook.html", variables = NULL, ...) {
   ext <- tolower(tools::file_ext(path))
 
@@ -288,13 +270,6 @@ cb_export <- function(path = "codebook.html", variables = NULL, ...) {
 #' @param show_elapsed Logical. Include elapsed_s column? Default: FALSE.
 #' @return Invisible path.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:50)
-#' track_step(df, "Initial cohort")
-#' out <- file.path(tempdir(), "tracking_table.csv")
-#' track_export(out)
 track_export <- function(path = "tracking_table.html", show_elapsed = FALSE) {
   ext <- tolower(tools::file_ext(path))
   tr <- .cb_env$tracking

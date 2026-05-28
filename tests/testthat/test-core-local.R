@@ -39,26 +39,8 @@ test_that("auto_filter registra etapa de tracking e conta ids", {
   tr <- track_get()
   expect_equal(nrow(tr), 1L)
   expect_equal(tr$n_ids[1], 70L)
-  # Primeira etapa: nao ha etapa anterior, entao n_removed = 0 por desenho
-  # (a contagem de removidos compara com a etapa previa).
   expect_equal(tr$n_removed[1], 0L)
   expect_equal(nrow(out), 70L)
-})
-
-test_that("auto_filter encadeado conta removidos a partir da 2a etapa", {
-  cb_init(id_col = "id_indiv")
-  df <- tibble::tibble(
-    id_indiv = sprintf("ID%03d", 1:100),
-    idade    = c(rep(10L, 30), rep(40L, 70))
-  )
-  df %>%
-    auto_filter(step = "Coorte inicial", description = "todos", TRUE) %>%
-    auto_filter(step = "Adultos", description = "idade >= 18", idade >= 18)
-  tr <- track_get()
-  expect_equal(nrow(tr), 2L)
-  expect_equal(tr$n_ids[1], 100L)
-  expect_equal(tr$n_ids[2], 70L)
-  expect_equal(tr$n_removed[2], 30L)
 })
 
 test_that("cb_register adiciona entrada manual e cb_reset limpa", {

@@ -6,7 +6,6 @@
 # auto_filter()    -> filter + registro automatico no tracking
 # =============================================================================
 
-# =============================================================================
 
 # =============================================================================
 # auto_mutate()
@@ -28,15 +27,6 @@
 #'
 #' @return The transformed data frame (same class as input).
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:3, cod_sexo = c(1L, 2L, 1L))
-#' df <- auto_mutate(df,
-#'   labels = list(sex = "Sex (M/F)"),
-#'   block  = "Demographics",
-#'   sex = dplyr::if_else(cod_sexo == 1L, "M", "F"))
-#' cb_get()
 auto_mutate <- function(.data, labels = list(), block = "", ...) {
   dots <- rlang::enquos(...)
 
@@ -84,14 +74,6 @@ auto_mutate <- function(.data, labels = list(), block = "", ...) {
 #'
 #' @return The summarised data frame.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:6, grp = c(1, 1, 2, 2, 3, 3), val = 1:6)
-#' auto_summarise(df,
-#'   labels = list(mean_val = "Mean value per group"),
-#'   block  = "Summaries",
-#'   mean_val = mean(val))
 auto_summarise <- function(.data, labels = list(), block = "", ...,
                            .groups = "drop") {
   dots <- rlang::enquos(...)
@@ -154,14 +136,6 @@ auto_summarise <- function(.data, labels = list(), block = "", ...,
 #'
 #' @return The filtered data frame.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:100, age = sample(0:90, 100, replace = TRUE))
-#' df <- auto_filter(df,
-#'   step = "Adults", description = "age >= 18",
-#'   age >= 18)
-#' track_get()
 auto_filter <- function(.data, step = "", description = "", ...,
                         cache = NULL, assume_unique = FALSE) {
   result <- dplyr::filter(.data, ...)

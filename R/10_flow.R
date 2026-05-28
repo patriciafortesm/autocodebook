@@ -20,6 +20,7 @@
 # agregados (poucas linhas) voltam pro R.
 # =============================================================================
 
+
 # Inicializa a arvore no environment (chamado por cb_init via flow_reset)
 .flow_init <- function() {
   .cb_env$flow <- list(
@@ -37,11 +38,6 @@
 #' Clears the CONSORT flow tree. Called automatically by `cb_init()`.
 #' @return Invisible NULL.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' flow_reset()
-#' flow_get()
 flow_reset <- function() {
   .flow_init()
   invisible(NULL)
@@ -53,10 +49,6 @@ flow_reset <- function() {
 #' programmatic access. For a tidy table, use `flow_table()`.
 #' @return A list describing the flow tree.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' flow_get()
 flow_get <- function() {
   if (is.null(.cb_env$flow)) .flow_init()
   .cb_env$flow
@@ -169,17 +161,14 @@ flow_get <- function() {
 #' @export
 #'
 #' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(
-#'   id      = 1:200,
-#'   exposed = sample(c(0L, 1L), 200, replace = TRUE),
-#'   migrated = sample(c(0L, 1L), 200, replace = TRUE)
-#' )
+#' \dontrun{
 #' df %>%
-#'   track_split(by = "exposed", label = "Exposure",
-#'               value_labels = c("0" = "No", "1" = "Yes")) %>%
-#'   track_outcomes(c("migrated"), labels = list(migrated = "Migration"))
-#' flow_table()
+#'   track_split(by = "exposto_seca", label = "Exposição: seca",
+#'               value_labels = c("0" = "Sem seca", "1" = "Com seca")) %>%
+#'   track_split(by = "migrou", label = "Mediador: migração",
+#'               value_labels = c("0" = "Não migrou", "1" = "Migrou")) %>%
+#'   track_outcomes(c("obito_dcv", "obito_infec"))
+#' }
 track_split <- function(sdf, by, label = NULL, value_labels = NULL,
                         max_levels = 3L) {
   if (is.null(.cb_env$flow)) .flow_init()
@@ -266,18 +255,6 @@ track_split <- function(sdf, by, label = NULL, value_labels = NULL,
 #'
 #' @return `sdf` unchanged (for piping).
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(
-#'   id     = 1:200,
-#'   grp    = sample(c(0L, 1L), 200, replace = TRUE),
-#'   died   = sample(c(0L, 1L), 200, replace = TRUE)
-#' )
-#' df %>%
-#'   track_split(by = "grp", label = "Group") %>%
-#'   track_outcomes(c("died"), labels = list(died = "Death"))
-#' flow_table()
 track_outcomes <- function(sdf, vars, labels = NULL) {
   if (is.null(.cb_env$flow)) .flow_init()
 
@@ -327,12 +304,6 @@ track_outcomes <- function(sdf, vars, labels = NULL) {
 #'
 #' @return A tibble.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:200, grp = sample(c(0L, 1L), 200, replace = TRUE))
-#' df %>% track_split(by = "grp", label = "Group")
-#' flow_table()
 flow_table <- function() {
   fl <- flow_get()
   if (is.na(fl$n_root)) {

@@ -16,12 +16,6 @@
 #'
 #' @return Invisible integer: number of unique IDs.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:50)
-#' track_step(df, "Initial cohort", description = "All records")
-#' track_get()
 track_step <- function(sdf, step_label, description = "",
                        assume_unique = FALSE) {
   id_col <- .cb_env$id_col
@@ -70,12 +64,6 @@ track_step <- function(sdf, step_label, description = "",
 #' Get the current tracking log as a tibble
 #' @return A tibble with all tracking steps.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:50)
-#' track_step(df, "Initial cohort")
-#' track_get()
 track_get <- function() {
   .cb_env$tracking
 }
@@ -83,13 +71,6 @@ track_get <- function() {
 #' Reset the tracking log
 #' @return Invisible NULL.
 #' @export
-#'
-#' @examples
-#' cb_init(id_col = "id")
-#' df <- tibble::tibble(id = 1:50)
-#' track_step(df, "Initial cohort")
-#' track_reset()
-#' track_get()
 track_reset <- function() {
   .cb_env$tracking <- tibble(
     step = character(), description = character(),
@@ -118,16 +99,6 @@ track_reset <- function() {
 #'
 #' @return The (possibly materialized) data frame.
 #' @export
-#'
-#' @examples
-#' # On local data frames this is a no-op and returns the data unchanged.
-#' df <- tibble::tibble(a = 1:10)
-#' identical(cb_checkpoint(df, mode = "memory"), df)
-#'
-#' \donttest{
-#' # With a Spark connection, materializes a lazy tbl_spark:
-#' # sdf <- cb_checkpoint(sdf, mode = "memory")
-#' }
 cb_checkpoint <- function(sdf, name = NULL, mode = c("memory", "disk", "register")) {
   mode <- match.arg(mode)
 
