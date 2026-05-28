@@ -1,9 +1,9 @@
 Package: autocodebook
 Title: Automatic Codebook and Tracking for 'Spark' and 'dplyr' Pipelines
-Version: 0.3.12
+Version: 0.1.0
 Authors@R: 
     person("Patricia Fortes C. de", "Macedo",
-           email = "REPLACE_WITH_REAL_EMAIL@example.org",
+           email = "macedopatriciafortes@gmail.com",
            role = c("aut", "cre"))
 Description: Wraps 'dplyr' verbs (mutate, summarise, filter) to automatically
     capture variable metadata (type, source columns, categories, and source
@@ -14,18 +14,15 @@ Description: Wraps 'dplyr' verbs (mutate, summarise, filter) to automatically
     eligibility flowchart, editable codebook export (HTML, DOCX, XLSX), and
     cross-sectional or longitudinal variable inspection.
 License: MIT + file LICENSE
-URL: https://github.com/REPLACE/autocodebook
-BugReports: https://github.com/REPLACE/autocodebook/issues
+URL: https://github.com/patriciafortesm/autocodebook
+BugReports: https://github.com/patriciafortesm/autocodebook/issues
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.2
 Imports:
     dplyr (>= 1.1.0),
     rlang (>= 1.0.0),
     tibble,
-    gt,
-    stats,
-    utils
+    gt
 Suggests:
     sparklyr,
     dbplyr,
@@ -39,3 +36,4 @@ Suggests:
     flextable,
     openxlsx,
     scales
+Config/roxygen2/version: 8.0.0
