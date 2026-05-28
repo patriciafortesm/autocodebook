@@ -184,11 +184,15 @@ publication):
 
 ![Codebook exported to Excel](man/figures/codebook_xlsx.png)
 
-## CONSORT-style flow tree
+## Subgroup x outcome counts (CONSORT-style data)
 
 For studies that split the cohort by exposure (and optionally by mediator),
-`track_split()` + `track_outcomes()` build a CONSORT-style flow tree
-showing N and outcome counts at every branch:
+`track_split()` + `track_outcomes()` build a tidy tibble of N and outcome
+counts at every subgroup combination. This is the **data** behind a
+CONSORT-style diagram — ready for analysis, export, or as input to a
+diagramming package such as
+[`consort`](https://CRAN.R-project.org/package=consort) or
+[`DiagrammeR`](https://CRAN.R-project.org/package=DiagrammeR).
 
 ```r
 df %>%
@@ -200,8 +204,16 @@ df %>%
                  labels = list(death_cvd    = "CVD death",
                                death_infect = "Infectious death"))
 
-flow_table()  # Tidy tibble with one row per leaf x outcome
+flow_table()
 ```
+
+**Output** — one row per subgroup (leaf) × outcome:
+
+![flow_table output](man/figures/flow_table.png)
+
+The tibble can be exported (CSV, XLSX) or piped into your preferred
+plotting / diagram package. A built-in renderer for the diagram itself
+is planned for a future release.
 
 ## Spark example
 
