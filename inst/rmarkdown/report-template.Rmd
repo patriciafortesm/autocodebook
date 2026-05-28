@@ -1,0 +1,240 @@
+---
+title: "`r report_title`"
+output:
+  html_document:
+    toc: true
+    toc_float: true
+    theme: cosmo
+    self_contained: true
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE,
+                     dpi = 100)
+.fig_w_panel <- if (report_type == "longitudinal") 11   else 8
+.fig_h_panel <- if (report_type == "longitudinal") 3.4  else 2.8
+
+# Helper para badge HTML
+.badge_html <- function(meta) {
+  if (is.null(meta)) return("")
+  if (is.null(meta$badge_label) || identical(meta$badge_kind, "none")) return("")
+  col <- switch(meta$badge_kind,
+    fixed        = "background:#E1F5EE;color:#04342C;",
+    varies       = "background:#FAECE7;color:#4A1B0C;",
+    missing_high = "background:#FCEBEB;color:#501313;",
+    "background:#F1EFE8;color:#2C2C2A;"
+  )
+  sprintf('<span style="font-size:11px;padding:2px 10px;border-radius:10px;%s">%s</span>',
+          col, meta$badge_label)
+}
+
+# Helper subtitulo da variavel
+.var_subtitle <- function(meta) {
+  if (is.null(meta)) return("")
+  parts <- c()
+  cls_pt <- switch(meta$class,
+    numeric = "numérica", integer = "inteira",
+    character = "categórica", logical = "lógica",
+    date = "data", meta$class)
+  parts <- c(parts, cls_pt)
+  if (!is.na(meta$n_levels)) parts <- c(parts, sprintf("%d níveis", meta$n_levels))
+  if (!is.na(meta$pct_missing)) {
+    parts <- c(parts, sprintf("%s missing",
+                              paste0(formatC(100*meta$pct_missing, format="f", digits=1), "%")))
+  }
+  paste(parts, collapse = " · ")
+}
+
+# Subtitulo como tag unica (pilula)
+.var_subtitle_tag <- function(meta) {
+  txt <- .var_subtitle(meta)
+  if (!nzchar(txt)) return("")
+  sprintf('<span style="font-size:11px;padding:2px 10px;border-radius:10px;background:#F1EFE8;color:#5F5E5A;">%s</span>',
+          txt)
+}
+```
+
+```{css, echo=FALSE}
+body {
+  background: #F1EFE8;
+}
+.main-container {
+  max-width: 1100px;
+}
+.acb-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+  margin: 8px 0 24px;
+}
+.acb-metric {
+  background: #ffffff;
+  border-radius: 12px;
+  padding: 16px;
+  border: 0.5px solid rgba(0,0,0,0.10);
+}
+.acb-metric .lbl {
+  font-size: 12px; color: #5F5E5A; margin: 0;
+}
+.acb-metric .val {
+  font-size: 22px; font-weight: 500; margin: 6px 0 0; color: #2C2C2A;
+}
+.acb-card {
+  background: #ffffff;
+  border: 0.5px solid rgba(0,0,0,0.10);
+  border-radius: 12px;
+  padding: 18px 20px;
+  margin: 0 0 16px;
+}
+.acb-card h2, .acb-card h3 { margin-top: 0; }
+.acb-var-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 10px;
+}
+.acb-var-title { font-size: 16px; font-weight: 500; margin: 0; color: #2C2C2A; }
+.acb-var-sub  { font-size: 12px; color: #5F5E5A; margin: 2px 0 0; }
+h1.title { color: #2C2C2A; font-weight: 700; }
+/* Titulos de secao (# Codebook, # Inspecao...) em negrito */
+.acb-card > h1 {
+  font-weight: 700;
+  font-size: 22px;
+  color: #2C2C2A;
+}
+/* Header de secao solto (# Inspecao de variaveis) em negrito.
+   So h1 — NAO h2, porque os nomes das variaveis sao h2 e devem ficar normais. */
+.main-container > h1, h1:not(.title) {
+  font-weight: 700;
+  color: #2C2C2A;
+}
+/* Nomes de variaveis (## var) ficam em peso normal */
+.main-container > h2 { font-weight: 400; }
+/* TOC flutuante incremental */
+.tocify {
+  border-radius: 10px;
+  border: 0.5px solid rgba(0,0,0,0.12);
+}
+.tocify-header .tocify-item { font-size: 13px; }
+.list-group-item.active {
+  background: #185FA5; border-color: #185FA5;
+}
+```
+
+```{r resumo-cards, results="asis"}
+ds <- report_dataset
+n_vars <- length(report_inspection$plots)
+
+periodo <- if (!is.null(ds$time_range)) {
+  paste0(as.character(ds$time_range$min_t), "–", as.character(ds$time_range$max_t))
+} else "—"
+
+n_ids_str <- if (!is.na(ds$n_ids)) format(ds$n_ids, big.mark = ",") else "—"
+
+cat('<div class="acb-metrics">')
+cat(sprintf('<div class="acb-metric"><p class="lbl">Linhas</p><p class="val">%s</p></div>',
+            format(ds$n_rows, big.mark = ",")))
+cat(sprintf('<div class="acb-metric"><p class="lbl">Indivíduos</p><p class="val">%s</p></div>',
+            n_ids_str))
+cat(sprintf('<div class="acb-metric"><p class="lbl">Período</p><p class="val" style="font-size:16px;">%s</p></div>',
+            periodo))
+cat(sprintf('<div class="acb-metric"><p class="lbl">Variáveis</p><p class="val">%s</p></div>',
+            n_vars))
+cat('</div>')
+```
+
+```{r tracking-table, results='asis'}
+if (nrow(report_tracking) > 0) {
+  cat("# Elegibilidade {.acb-card}\n\n")
+  tr <- report_tracking
+  if ("elapsed_s" %in% names(tr)) tr$elapsed_s <- NULL
+  print(knitr::kable(tr, format.args = list(big.mark = "."),
+               col.names = c("Etapa", "Descrição", "N", "Removidos"),
+               caption = "Etapas de elegibilidade (editável: tabela_elegibilidade.xlsx)"))
+  if (isTRUE(report_has_tree)) {
+    cat("\n\n")
+    print(knitr::kable(report_flow_tree, format.args = list(big.mark = "."),
+                 caption = "Distribuição por grupos (editável: tabela_grupos.xlsx)"))
+  }
+}
+```
+
+# Codebook {.acb-card}
+
+```{r codebook}
+if (nrow(report_codebook) > 0) {
+  cb_render(group_by_block = TRUE, show_code = TRUE)
+} else {
+  cat("_Codebook vazio._")
+}
+```
+
+```{r ancillary, results="asis"}
+if (length(report_ancillary) > 0) {
+  cat("\n**Exports editáveis:** ")
+  cat(paste0("`", vapply(report_ancillary, basename, character(1)), "`",
+             collapse = " · "))
+  cat("\n")
+}
+```
+
+# Inspeção de variáveis
+
+```{r inspection-cross, results="asis", eval=(report_type != "longitudinal")}
+# Transversal: grid unico de mini-paineis (3 colunas) dentro de um card
+n_vars <- report_inspection$extras$n_vars
+if (!is.null(n_vars) && n_vars > 0) {
+  n_rows <- ceiling(n_vars / 3)
+  fig_h  <- max(2.2, n_rows * 2.0)
+  cat('<div class="acb-card">\n')
+  src <- c(
+    sprintf("```{r cross_grid, fig.width=10, fig.height=%s, echo=FALSE}", fig_h),
+    "print(report_inspection$extras$grid)",
+    "```"
+  )
+  out <- knitr::knit_child(text = paste(src, collapse = "\n"),
+                            quiet = TRUE, envir = environment())
+  cat(out)
+  cat('\n</div>\n')
+}
+```
+
+```{r inspection-long, results="asis", eval=(report_type == "longitudinal")}
+plots <- report_inspection$plots
+metas <- report_inspection$metas
+
+src <- c()
+for (var in names(plots)) {
+  chunk_id <- paste0("var_", gsub("[^A-Za-z0-9_]", "_", var))
+  meta <- if (!is.null(metas)) metas[[var]] else NULL
+  badge <- .badge_html(meta)
+  sub_tag <- .var_subtitle_tag(meta)
+
+  header <- paste0(
+    '<div class="acb-card">',
+    '<div class="acb-var-header">',
+    '<div><p class="acb-var-title">', var, '</p>',
+    sub_tag, '</div>',
+    badge,
+    '</div>'
+  )
+  src <- c(src,
+    sprintf("## %s\n", var),
+    sprintf("```{r %s_hdr, results='asis', echo=FALSE}", chunk_id),
+    sprintf("cat(%s)", deparse(header)),
+    "```",
+    sprintf("```{r %s, fig.width=%s, fig.height=%s, echo=FALSE}",
+            chunk_id, .fig_w_panel, .fig_h_panel),
+    sprintf("print(report_inspection$plots[[%s]])", deparse(var)),
+    "```",
+    sprintf("```{r %s_end, results='asis', echo=FALSE}", chunk_id),
+    "cat('</div>')",
+    "```\n"
+  )
+}
+out <- knitr::knit_child(text = paste(src, collapse = "\n"),
+                          quiet = TRUE, envir = environment())
+cat(out)
+```
+
+---
+
+*Gerado por `autocodebook::generate_report()`*
