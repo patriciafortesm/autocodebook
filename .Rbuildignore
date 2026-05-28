@@ -1,0 +1,9 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^cran-comments\.md$
+^\.Rbuildignore$
+^inst/tests$
+^LICENSE\.md$
+^\.github$
+^autocodebook_preparar_cran.*\.R$
+^corrigir_in_place\.R$
