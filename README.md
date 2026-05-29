@@ -5,7 +5,7 @@ Automatic codebook and eligibility tracking for data preprocessing pipelines in 
 **Write the `mutate()` — the codebook writes itself.**
 
 Built for large-scale epidemiological and social data pipelines using
-[sparklyr](https://spark.rstudio.com/), but works equally well with local
+[sparklyr](https://spark.posit.co/), but works equally well with local
 data frames.
 
 ## Installation
